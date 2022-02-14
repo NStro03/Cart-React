@@ -1,18 +1,47 @@
-import React, { useState, useContext, useReducer, useEffect } from 'react'
+import React, { useContext, useReducer } from 'react'
+import { CLEAR_CART, DECREMENT_ITEM, INCREMENT_ITEM, REMOVE_ITEM } from './constants'
 import cartItems from './data'
 import reducer from './reducer'
 // ATTENTION!!!!!!!!!!
 // I SWITCHED TO PERMANENT DOMAIN
-const url = 'https://course-api.com/react-useReducer-cart-project'
+// const url = 'https://course-api.com/react-useReducer-cart-project'
 const AppContext = React.createContext()
 
 const AppProvider = ({ children }) => {
-  const [cart, setCart] = useState(cartItems)
+  const totalItems = cartItems.reduce((count, item) => (count += item.amount), 0);
+  const totalCost = cartItems.reduce((cost, item) => (cost += (item.amount * item.price)), 0);
+
+  const stateDefault = {
+    totalCost,
+    totalItems,
+    cart: cartItems
+  }
+  const [state, dispatch] = useReducer(reducer, stateDefault);
+
+  const incrementQtyForId = (id) => {
+    dispatch({ type: INCREMENT_ITEM, payload: id });
+  }
+
+  const decrementQtyForId = (id) => {
+    dispatch({ type: DECREMENT_ITEM, payload: id });
+  }
+
+  const removeItemWithId = (id) => {
+    dispatch({ type: REMOVE_ITEM, payload: id });
+  }
+
+  const clearCart = () => {
+    dispatch({ type: CLEAR_CART });
+  }
 
   return (
     <AppContext.Provider
       value={{
-        cart,
+        ...state,
+        incrementQtyForId,
+        decrementQtyForId,
+        removeItemWithId,
+        clearCart
       }}
     >
       {children}
